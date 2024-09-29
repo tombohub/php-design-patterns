@@ -41,21 +41,23 @@ $chickenRestaurant = new ChickenRestaurant();
 $beefRestaurant->serveBurger();
 $chickenRestaurant->serveBurger();
 
-// Advanced client usage.
-// Use reflection and dynamically create valid restaurant types. NOT FINISHED
+// medium advanced usage.
+// Register implementations in enum.
 
-function getRestaurantImplementations()
+enum RestaurantImplementationType
 {
-    $implementations = [];
-    foreach (get_declared_classes() as $className) {
-        $reflectionClass = new ReflectionClass($className);
-        if ($reflectionClass->isSubclassOf(Restaurant::class)) {
-            $implementations[] = $className;
-        }
-    }
-    return $implementations;
+    case BEEF;
+    case CHICKEN;
 }
 
-$restaurantType = 'beef';
-$restaurantImplementations = getRestaurantImplementations();
-print_r($restaurantImplementations);
+function getRestaurantImplementation(RestaurantImplementationType $type): Restaurant
+{
+    return match ($type) {
+        RestaurantImplementationType::BEEF => new BeefRestaurant(),
+        RestaurantImplementationType::CHICKEN => new ChickenRestaurant()
+    };
+}
+
+$restaurant = getRestaurantImplementation(RestaurantImplementationType::CHICKEN);
+
+$restaurant->serveBurger();
