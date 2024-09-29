@@ -50,7 +50,7 @@ enum RestaurantImplementationType
     case CHICKEN;
 }
 
-function getRestaurantImplementation(RestaurantImplementationType $type): Restaurant
+function createRestaurant(RestaurantImplementationType $type): Restaurant
 {
     return match ($type) {
         RestaurantImplementationType::BEEF => new BeefRestaurant(),
@@ -58,6 +58,37 @@ function getRestaurantImplementation(RestaurantImplementationType $type): Restau
     };
 }
 
-$restaurant = getRestaurantImplementation(RestaurantImplementationType::CHICKEN);
+$restaurant = createRestaurant(RestaurantImplementationType::CHICKEN);
 
 $restaurant->serveBurger();
+
+// advanced usage
+// dynamically get implementations. Limitations is that implementation class needs to end in Restaurant. To avoid this we can have property in each implementations to uniquelly identify each restaurant
+
+function getRestaurantImplementationClassNames()
+{
+    $restaurants = [];
+    foreach (get_declared_classes() as $className) {
+        $reflectionClass = new ReflectionClass($className);
+        if ($reflectionClass->isSubclassOf(Restaurant::class) && !$reflectionClass->isAbstract()) {
+            $restaurants[] = $className;
+        }
+    }
+    return $restaurants;
+}
+
+function createNameFromRestaurantClassName(string $className)
+{
+    if (str_ends_with($className, 'Restaurant')) {
+        $name = substr($className, 0, -strlen('Restaurant'));
+        return strtolower($name);
+    } else {
+        throw new Error('class name needs to end in Restaurant');
+    }
+}
+
+// ...and so on so on. create function to get class name from restaurant name.
+// Create an array of all names. User input validate against that array, throw error if name is not in array, show available names.
+
+
+print_r(getRestaurantImplementationClassNames());
